@@ -75,11 +75,28 @@ fun getTheTweet(): Tweet {
 
 @Composable
 fun TweetScreen(tweet: Tweet, modifier: Modifier = Modifier) {
-    Scaffold(
-        topBar = { TopBar() },
-    ) {
-
+    Scaffold(topBar = { TopBar() }) {
+        Column {
+            HeaderContent(tweet)
+            TweetDataContent(tweet)
+            FooterContent(tweet)
+        }
     }
+}
+
+@Composable
+fun FooterContent(tweet: Tweet) {
+
+}
+
+@Composable
+fun TweetDataContent(tweet: Tweet) {
+
+}
+
+@Composable
+fun HeaderContent(tweet: Tweet) {
+
 }
 
 @Composable
@@ -103,7 +120,8 @@ private fun TopBar() {
         )
         Spacer(modifier = Modifier
             .height(1.dp)
-            .fillMaxWidth().background(color = TopBarSeparator))
+            .fillMaxWidth()
+            .background(color = TopBarSeparator))
     }
 }
 
