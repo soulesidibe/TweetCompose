@@ -3,12 +3,21 @@ package com.soulesidibe.tweetcompose
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import com.soulesidibe.tweetcompose.ui.theme.StatusBarLightColor
+import com.soulesidibe.tweetcompose.ui.theme.TopBarSeparator
 import com.soulesidibe.tweetcompose.ui.theme.TweetComposeTheme
 
 class MainActivity : ComponentActivity() {
@@ -16,11 +25,23 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             TweetComposeTheme {
+                val systemUiController = rememberSystemUiController()
+                val useDarkIcons = MaterialTheme.colors.isLight
+
+                SideEffect {
+                    // Update all of the system bar colors to be transparent, and use
+                    // dark icons if we're in light theme
+                    systemUiController.setSystemBarsColor(
+                        color = if (useDarkIcons) StatusBarLightColor else Color.Black,
+                        darkIcons = useDarkIcons
+                    )
+
+                    // setStatusBarsColor() and setNavigationBarsColor() also exist
+                }
+
                 // A surface container using the 'background' color from the theme
                 Surface(color = MaterialTheme.colors.background) {
-                    TweetScreen(getTheTweet()) {
-
-                    }
+                    TweetScreen(getTheTweet())
                 }
             }
         }
@@ -53,16 +74,43 @@ fun getTheTweet(): Tweet {
 }
 
 @Composable
-fun TweetScreen(tweet: Tweet, modifier: Modifier = Modifier, content: @Composable () -> Unit) {
+fun TweetScreen(tweet: Tweet, modifier: Modifier = Modifier) {
+    Scaffold(
+        topBar = { TopBar() },
+    ) {
 
+    }
+}
+
+@Composable
+private fun TopBar() {
+    Column {
+        TopAppBar(
+            backgroundColor = MaterialTheme.colors.background,
+            elevation = 0.dp,
+            title = {
+                Text(text = stringResource(R.string.str_topbar_title))
+            },
+            navigationIcon = {
+                IconButton(onClick = { }) {
+                    Icon(
+                        imageVector = Icons.Default.ArrowBack,
+                        tint = MaterialTheme.colors.secondary,
+                        contentDescription = stringResource(R.string.content_desc_arrow_back)
+                    )
+                }
+            }
+        )
+        Spacer(modifier = Modifier
+            .height(1.dp)
+            .fillMaxWidth().background(color = TopBarSeparator))
+    }
 }
 
 @Preview
 @Composable
 fun PreviewTweetScreen() {
-    TweetScreen(tweet = getTheTweet()) {
-
-    }
+    TweetScreen(tweet = getTheTweet())
 }
 
 data class Tweet(val user: User, val media: Media, val data: TweetData)

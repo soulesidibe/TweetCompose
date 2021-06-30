@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">TweetCompose</string>
+    <string name="str_topbar_title">Tweet</string>
+    <string name="content_desc_arrow_back">Go back</string>
 </resources>
