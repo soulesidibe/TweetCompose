@@ -33,7 +33,7 @@ private val LightColorPalette = lightColors(
 
 @Composable
 fun TweetComposeTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    darkTheme: Boolean = false/*isSystemInDarkTheme()*/,
     content: @Composable() () -> Unit
 ) {
     val colors = if (darkTheme) {
