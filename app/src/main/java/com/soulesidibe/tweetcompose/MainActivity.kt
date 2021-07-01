@@ -3,22 +3,34 @@ package com.soulesidibe.tweetcompose
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.SideEffect
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.layout.layoutId
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.constraintlayout.compose.ConstraintSet
+import com.google.accompanist.coil.rememberCoilPainter
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
-import com.soulesidibe.tweetcompose.ui.theme.StatusBarLightColor
-import com.soulesidibe.tweetcompose.ui.theme.TopBarSeparator
-import com.soulesidibe.tweetcompose.ui.theme.TweetComposeTheme
+import com.soulesidibe.tweetcompose.ui.theme.*
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -50,13 +62,13 @@ class MainActivity : ComponentActivity() {
 
 }
 
-fun getTheTweet(): Tweet {
+fun getTheTweet(isVerified: Boolean = true): Tweet {
     val imageLink = "https://pbs.twimg.com/profile_images/1168932726461935621/VRtfrDXq_400x400.png"
     val user = User(
         displayName = "Android Developers",
         handle = "@AndroidDev",
         image = imageLink,
-        isVerified = true
+        isVerified = isVerified
     )
     val media = Media(listOf("https://pbs.twimg.com/media/E5AurCOXoAolXo3?format=jpg&name=large"))
     val tweetData = TweetData(
@@ -77,7 +89,7 @@ fun getTheTweet(): Tweet {
 fun TweetScreen(tweet: Tweet, modifier: Modifier = Modifier) {
     Scaffold(topBar = { TopBar() }) {
         Column {
-            HeaderContent(tweet)
+            HeaderContent(tweet, modifier = Modifier.height(88.dp))
             TweetDataContent(tweet)
             FooterContent(tweet)
         }
@@ -95,8 +107,83 @@ fun TweetDataContent(tweet: Tweet) {
 }
 
 @Composable
-fun HeaderContent(tweet: Tweet) {
+fun HeaderContent(tweet: Tweet, modifier: Modifier = Modifier) {
+    Row(
+        modifier = modifier
+            .wrapContentHeight()
+            .fillMaxWidth()
+            .padding(16.dp)
+    ) {
+        Image(
+            modifier = Modifier
+                .size(56.dp, 56.dp)
+                .weight(1f),
+            painter = rememberCoilPainter(tweet.user.image),
+            contentDescription = stringResource(R.string.image_content_desc),
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        Column(
+            modifier = Modifier
+                .fillMaxHeight()
+                .weight(4f),
+            horizontalAlignment = Alignment.Start,
+            verticalArrangement = Arrangement.Center
+        ) {
+            DisplayNameAndVerified(tweet.user)
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(text = tweet.user.handle, color = LightDateColor)
+        }
+        Icon(
+            imageVector = Icons.Default.MoreVert,
+            contentDescription = stringResource(id = R.string.content_desc_tweet_options),
+            tint = TweetOptionsColorLight
+        )
 
+    }
+}
+
+@Composable
+fun DisplayNameAndVerified(user: User) {
+
+    val constraintSet = ConstraintSet {
+        val displayName = createRefFor("display_name")
+        val verified = createRefFor("verified")
+
+        constrain(displayName) {
+            top.linkTo(parent.top)
+            start.linkTo(parent.start)
+            bottom.linkTo(parent.bottom)
+        }
+        if (user.isVerified) {
+            constrain(verified) {
+                start.linkTo(displayName.end, 8.dp)
+                top.linkTo(displayName.top)
+                bottom.linkTo(displayName.bottom)
+            }
+        }
+
+    }
+    ConstraintLayout(constraintSet = constraintSet) {
+        Text(
+            text = user.displayName,
+            modifier = Modifier.layoutId("display_name"),
+            style = TextStyle(fontWeight = FontWeight.Bold)
+        )
+        if (user.isVerified) {
+            Icon(
+                modifier = Modifier.layoutId("verified"),
+                painter = painterResource(id = R.drawable.ic_twitter_verified_badge),
+                contentDescription = stringResource(id = R.string.content_desc_verified_Account),
+                tint = MaterialTheme.colors.secondary
+            )
+        }
+    }
+}
+
+@Preview(name = "Header", showBackground = true, heightDp = 88)
+@Composable
+fun PreviewHeaderContent() {
+    HeaderContent(tweet = getTheTweet(false))
 }
 
 @Composable
@@ -118,18 +205,20 @@ private fun TopBar() {
                 }
             }
         )
-        Spacer(modifier = Modifier
-            .height(1.dp)
-            .fillMaxWidth()
-            .background(color = TopBarSeparator))
+        Spacer(
+            modifier = Modifier
+                .height(1.dp)
+                .fillMaxWidth()
+                .background(color = TopBarSeparator)
+        )
     }
 }
 
-@Preview
-@Composable
-fun PreviewTweetScreen() {
-    TweetScreen(tweet = getTheTweet())
-}
+//@Preview
+//@Composable
+//fun PreviewTweetScreen() {
+//    TweetScreen(tweet = getTheTweet())
+//}
 
 data class Tweet(val user: User, val media: Media, val data: TweetData)
 data class User(

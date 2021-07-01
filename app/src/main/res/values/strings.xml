@@ -2,4 +2,7 @@
     <string name="app_name">TweetCompose</string>
     <string name="str_topbar_title">Tweet</string>
     <string name="content_desc_arrow_back">Go back</string>
+    <string name="image_content_desc">User profile picture</string>
+    <string name="content_desc_tweet_options">Tweet Options</string>
+    <string name="content_desc_verified_Account">Verified Account</string>
 </resources>
