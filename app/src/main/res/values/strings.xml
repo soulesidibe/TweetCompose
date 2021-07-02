@@ -5,4 +5,6 @@
     <string name="image_content_desc">User profile picture</string>
     <string name="content_desc_tweet_options">Tweet Options</string>
     <string name="content_desc_verified_Account">Verified Account</string>
+    <string name="str_retweets">Retweets</string>
+    <string name="str_likes">Likes</string>
 </resources>

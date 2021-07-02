@@ -5,31 +5,32 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.layoutId
+import androidx.compose.ui.platform.textInputServiceFactory
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.ConstraintSet
-import coil.transform.BlurTransformation
-import coil.transform.GrayscaleTransformation
-import coil.transform.RoundedCornersTransformation
 import com.google.accompanist.coil.rememberCoilPainter
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.soulesidibe.tweetcompose.ui.theme.*
@@ -91,10 +92,16 @@ fun getTheTweet(isVerified: Boolean = true): Tweet {
 fun TweetScreen(tweet: Tweet, modifier: Modifier = Modifier) {
     Scaffold(topBar = { TopBar() }) {
         Column(modifier = modifier.verticalScroll(rememberScrollState())) {
-            HeaderContent(tweet, modifier = Modifier.height(88.dp))
+            HeaderContent(tweet)
             Spacer(modifier = Modifier.height(4.dp))
             TweetDataContent(tweet)
-            FooterContent(tweet)
+            Spacer(modifier = Modifier.height(10.dp))
+            FooterContent(
+                tweet, modifier = Modifier
+                    .fillMaxWidth()
+                    .wrapContentHeight()
+                    .padding(start = 16.dp, end = 16.dp)
+            )
         }
     }
 }
@@ -108,7 +115,7 @@ fun TweetDataContent(tweet: Tweet) {
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(start = 16.dp, end = 16.dp),
-            fontSize = 23.sp
+            fontSize = 21.sp
         )
         Spacer(modifier = Modifier.height(16.dp))
         TweetMedia(tweet.media)
@@ -145,11 +152,11 @@ fun HeaderContent(tweet: Tweet, modifier: Modifier = Modifier) {
         modifier = modifier
             .wrapContentHeight()
             .fillMaxWidth()
-            .padding(16.dp)
+            .padding(8.dp)
     ) {
         Image(
             modifier = Modifier
-                .size(56.dp, 56.dp)
+                .size(48.dp, 48.dp)
                 .weight(1f),
             painter = rememberCoilPainter(tweet.user.image),
             contentDescription = stringResource(R.string.image_content_desc),
@@ -163,7 +170,7 @@ fun HeaderContent(tweet: Tweet, modifier: Modifier = Modifier) {
             verticalArrangement = Arrangement.Center
         ) {
             DisplayNameAndVerified(tweet.user)
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(4.dp))
             Text(text = tweet.user.handle, color = LightDateColor)
         }
         Icon(
@@ -176,9 +183,114 @@ fun HeaderContent(tweet: Tweet, modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun FooterContent(tweet: Tweet) {
+fun FooterContent(tweet: Tweet, modifier: Modifier = Modifier) {
+    val constrainsSet = ConstraintSet {
+        val dateAppNameRef = createRefFor("dateAppName")
+        val firstSeparator = createRefFor("separator_1")
+        val likeAndRetweets = createRefFor("likesAndRetweets")
+        val secondSeparator = createRefFor("separator_2")
+        val actionsRef = createRefFor("actions")
 
+        constrain(dateAppNameRef) {
+            top.linkTo(parent.top)
+            start.linkTo(parent.start)
+        }
+
+        val margin = 10.dp
+        constrain(firstSeparator) {
+            top.linkTo(dateAppNameRef.bottom, margin)
+            start.linkTo(parent.start)
+            end.linkTo(parent.end)
+        }
+
+        constrain(likeAndRetweets) {
+            top.linkTo(firstSeparator.bottom, margin)
+            start.linkTo(parent.start)
+        }
+
+        constrain(secondSeparator) {
+            top.linkTo(likeAndRetweets.bottom, margin)
+            start.linkTo(parent.start)
+            end.linkTo(parent.end)
+        }
+
+        constrain(actionsRef) {
+            top.linkTo(secondSeparator.bottom, margin)
+            start.linkTo(parent.start)
+            end.linkTo(parent.end)
+        }
+    }
+    ConstraintLayout(constraintSet = constrainsSet, modifier = modifier) {
+        Row(
+            modifier = Modifier.layoutId("dateAppName"),
+            horizontalArrangement = Arrangement.Start
+        ) {
+            CompositionLocalProvider(
+                LocalTextStyle provides MaterialTheme.typography.caption
+            ) {
+                Text(text = buildAnnotatedString {
+                    withStyle(style = SpanStyle(color = LightDateColor)) {
+                        append(tweet.data.time)
+                    }
+                })
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(text = "·")
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(text = buildAnnotatedString {
+                    withStyle(
+                        style = SpanStyle(
+                            color = MaterialTheme.colors.secondary
+                        )
+                    ) {
+                        append(tweet.data.client)
+                    }
+
+                })
+            }
+        }
+
+        val spacerModifier = Modifier
+            .background(color = LightDateColor.copy(alpha = 0.4f))
+            .fillMaxWidth()
+            .height(0.3.dp)
+        Spacer(modifier = spacerModifier.layoutId("separator_1"))
+
+        Row(modifier = Modifier
+            .layoutId("likesAndRetweets")
+            .padding(top = 4.dp, bottom = 4.dp)) {
+            CompositionLocalProvider(
+                LocalTextStyle provides MaterialTheme.typography.caption
+            ) {
+                Text(text = buildAnnotatedString {
+                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                        append("${tweet.data.retweets} ")
+                    }
+                    withStyle(style = SpanStyle(color = LightDateColor)) {
+                        append(stringResource(id = R.string.str_retweets))
+                    }
+                })
+
+                Spacer(modifier = Modifier.width(4.dp))
+
+                Text(text = buildAnnotatedString {
+                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                        append("${tweet.data.likes} ")
+                    }
+                    withStyle(style = SpanStyle(color = LightDateColor)) {
+                        append(stringResource(id = R.string.str_likes))
+                    }
+                })
+            }
+        }
+
+        Spacer(modifier = spacerModifier.layoutId("separator_2"))
+
+        Row(modifier = Modifier.layoutId("actions")) {
+
+        }
+    }
 }
+
 
 @Composable
 fun DisplayNameAndVerified(user: User) {
