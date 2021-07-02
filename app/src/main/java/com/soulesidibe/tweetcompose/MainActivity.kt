@@ -3,35 +3,33 @@ package com.soulesidibe.tweetcompose
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.TextUnit
-import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.ConstraintSet
+import coil.transform.BlurTransformation
+import coil.transform.GrayscaleTransformation
+import coil.transform.RoundedCornersTransformation
 import com.google.accompanist.coil.rememberCoilPainter
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.soulesidibe.tweetcompose.ui.theme.*
@@ -92,9 +90,9 @@ fun getTheTweet(isVerified: Boolean = true): Tweet {
 @Composable
 fun TweetScreen(tweet: Tweet, modifier: Modifier = Modifier) {
     Scaffold(topBar = { TopBar() }) {
-        Column(modifier = modifier) {
+        Column(modifier = modifier.verticalScroll(rememberScrollState())) {
             HeaderContent(tweet, modifier = Modifier.height(88.dp))
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(4.dp))
             TweetDataContent(tweet)
             FooterContent(tweet)
         }
@@ -103,12 +101,42 @@ fun TweetScreen(tweet: Tweet, modifier: Modifier = Modifier) {
 
 @Composable
 fun TweetDataContent(tweet: Tweet) {
-    Text(
-        text = messageFormatter(tweet.data.message),
-        color = Color.Black,
-        modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp),
-        fontSize = 23.sp
-    )
+    Column {
+        Text(
+            text = messageFormatter(tweet.data.message),
+            color = Color.Black,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 16.dp, end = 16.dp),
+            fontSize = 23.sp
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        TweetMedia(tweet.media)
+    }
+}
+
+@Composable
+fun TweetMedia(media: Media) {
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 16.dp, end = 16.dp),
+        shape = RoundedCornerShape(16.dp, 16.dp, 16.dp, 16.dp)
+    ) {
+        Image(
+            painter = rememberCoilPainter(
+                request = media.content.first(),
+                fadeIn = true,
+            ),
+            contentDescription = stringResource(R.string.image_content_desc),
+        )
+    }
+}
+
+@Preview(name = "Content")
+@Composable
+fun PreviewTweetDataContent() {
+    TweetDataContent(getTheTweet())
 }
 
 @Composable
@@ -193,7 +221,7 @@ fun DisplayNameAndVerified(user: User) {
 @Preview(name = "Header", showBackground = true, heightDp = 88)
 @Composable
 fun PreviewHeaderContent() {
-    HeaderContent(tweet = getTheTweet(false))
+    HeaderContent(tweet = getTheTweet())
 }
 
 @Composable
