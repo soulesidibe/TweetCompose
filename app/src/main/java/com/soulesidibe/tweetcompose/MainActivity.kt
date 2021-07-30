@@ -17,6 +17,7 @@ import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.AlignmentLine
 import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.platform.textInputServiceFactory
 import androidx.compose.ui.res.painterResource
@@ -29,6 +30,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.constraintlayout.compose.ChainStyle
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.ConstraintSet
 import com.google.accompanist.coil.rememberCoilPainter
@@ -111,11 +113,11 @@ fun TweetDataContent(tweet: Tweet) {
     Column {
         Text(
             text = messageFormatter(tweet.data.message),
-            color = Color.Black,
+            color = MaterialTheme.colors.onSurface,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(start = 16.dp, end = 16.dp),
-            fontSize = 21.sp
+            fontSize = 20.sp
         )
         Spacer(modifier = Modifier.height(16.dp))
         TweetMedia(tweet.media)
@@ -140,7 +142,7 @@ fun TweetMedia(media: Media) {
     }
 }
 
-@Preview(name = "Content")
+@Preview(name = "Content", showBackground = true)
 @Composable
 fun PreviewTweetDataContent() {
     TweetDataContent(getTheTweet())
@@ -255,9 +257,11 @@ fun FooterContent(tweet: Tweet, modifier: Modifier = Modifier) {
             .height(0.3.dp)
         Spacer(modifier = spacerModifier.layoutId("separator_1"))
 
-        Row(modifier = Modifier
-            .layoutId("likesAndRetweets")
-            .padding(top = 4.dp, bottom = 4.dp)) {
+        Row(
+            modifier = Modifier
+                .layoutId("likesAndRetweets")
+                .padding(top = 4.dp, bottom = 4.dp)
+        ) {
             CompositionLocalProvider(
                 LocalTextStyle provides MaterialTheme.typography.caption
             ) {
@@ -357,7 +361,7 @@ private fun TopBar() {
         )
         Spacer(
             modifier = Modifier
-                .height(1.dp)
+                .height(0.4.dp)
                 .fillMaxWidth()
                 .background(color = TopBarSeparator)
         )

@@ -7,4 +7,8 @@
     <string name="content_desc_verified_Account">Verified Account</string>
     <string name="str_retweets">Retweets</string>
     <string name="str_likes">Likes</string>
+    <string name="content_desc_action_comment">Add a ccomment</string>
+    <string name="content_desc_action_rt">Retweet</string>
+    <string name="content_desc_action_like">Like the tweet</string>
+    <string name="content_desc_action_share">Share the tweet</string>
 </resources>
